@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+import utils
+
 
 def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs, device):
     """
@@ -14,9 +16,6 @@ def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs
     :param device: The device to use for training.
     :return: The recorded losses and accuracies over the train and test datasets on every training epoch.
     """
-    # Move model to device.
-    model.to(device)
-
     train_losses, test_losses = [], []
     train_accuracies, test_accuracies = [], []
     for epoch in range(n_epochs):
@@ -24,18 +23,23 @@ def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs
         train_loss = train_one_epoch(model, optimizer, criterion, train_loader, device)
         # Compute the average loss over the test set after the current epoch.
         test_loss = compute_loss(model, criterion, test_loader, device)
-        # Track train loss and test loss
+        # Track train loss and test loss.
         train_losses.append(train_loss)
         test_losses.append(test_loss)
 
         # Calculate the model's accuracy over the train and test sets after the current epoch.
         train_accuracy = evaluate_model(model, train_loader, device)
         test_accuracy = evaluate_model(model, test_loader, device)
-        # Track train accuracy and test accuracy
+        # Track train accuracy and test accuracy.
         train_accuracies.append(train_accuracy)
         test_accuracies.append(test_accuracy)
 
-        print_training_progress(epoch + 1, train_loss, test_loss, train_accuracy, test_accuracy)
+        utils.print_epoch_metrics(epoch + 1, {
+            'Train Loss': train_loss,
+            'Test Loss': test_loss,
+            'Train Accuracy': train_accuracy,
+            'Test Accuracy': test_accuracy
+        })
     return train_losses, test_losses, train_accuracies, test_accuracies
 
 
@@ -49,20 +53,14 @@ def create_cross_entropy_loss():
 
 def replace_model_head(model, architecture, n_classes=10):
     """
-    Replace the final layer of the given ResNet or VGG model with a fully connected layer.
+    Replace the final layer of the given ResNet or VGG model with a new fully connected layer.
     :param model: The model to replace its final layer.
-    :param architecture: The model architecture, either 'resnet' or 'vgg'.
+    :param architecture: The model architecture, either 'resnetX' or 'vggX'.
     :param n_classes: The number of output features in the new fully connected layer.
     """
-    # Different model architectures use a different name for their final layer.
-    if architecture == 'resnet':
-        in_features = model.fc.in_features
-        model.fc = nn.Linear(in_features=in_features, out_features=n_classes)
-    elif architecture == 'vgg':
-        in_features = model.classifier[6].in_features
-        model.classifier[6] = nn.Linear(in_features=in_features, out_features=n_classes)
-    else:
-        raise ValueError(f'Unsupported model architecture.')
+    in_features = utils.get_final_layer_based_on_architecture(model, architecture).in_features
+    fc = nn.Linear(in_features=in_features, out_features=n_classes)
+    utils.set_final_layer_based_on_architecture(model, fc, architecture)
 
 
 def freeze_model(model):
@@ -167,20 +165,3 @@ def compute_loss(model, criterion, data_loader, device):
         loss = criterion(outputs, labels)
         total_loss += loss.item()
     return total_loss
-
-
-def print_training_progress(epoch, train_loss, test_loss, train_accuracy, test_accuracy, digits=3):
-    """
-    Prints the loss and accuracy results over the train and test dataset at the given training epoch.
-    :param epoch: The training epoch to display its metrics.
-    :param train_loss: The loss over the train dataset.
-    :param test_loss: The loss over the test dataset.
-    :param train_accuracy: The accuracy over the train dataset.
-    :param test_accuracy: The accuracy over the test dataset.
-    :param digits: The number of digits to display after the decimal point of every metric.
-    """
-    print('\t'.join([
-        f'Epoch {epoch}',
-        f'Train Loss: {train_loss:.{digits}f}', f'Test Loss: {test_loss:.{digits}f}',
-        f'Train Accuracy: {train_accuracy:.{digits}f}', f'Test Accuracy: {test_accuracy:.{digits}f}'
-    ]))
