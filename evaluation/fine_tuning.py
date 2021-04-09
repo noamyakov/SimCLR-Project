@@ -6,7 +6,7 @@ import utils
 
 def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs, device):
     """
-    Trains the model on the given train data and evaluate it on the given test data with every completed epoch.
+    Trains the model on the given train data and evaluates it on the given test data with every completed epoch.
     :param model: The model to train.
     :param optimizer: The optimizer used for train.
     :param criterion: The loss function used for training.
