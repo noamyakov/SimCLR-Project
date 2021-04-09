@@ -78,18 +78,19 @@ def create_data_loader(dataset, is_train, batch_size):
     return DataLoader(dataset, batch_size=batch_size, shuffle=is_train)
 
 
-def get_final_layer_based_on_architecture(model, architecture):
+def get_final_layer_based_on_architecture(model, architecture, is_simclr_model):
     """
     Returns the final layer (the head) of the given model based on its architecture.
     :param model: The model to return its final layer.
     :param architecture: The model architecture, either 'resnetX' or 'vggX'.
+    :param is_simclr_model: Whether the model has SimCLR's projection head or not.
     :return: The model's final layer.
     """
     # Different model architectures use a different name for their final layer.
     if architecture.startswith('resnet'):
-        return model.fc
+        return model.fc[0] if is_simclr_model else model.fc
     elif architecture.startswith('vgg'):
-        return model.classifier[6]
+        return model.classifier[0] if is_simclr_model else model.classifier[6]
     else:
         raise ValueError(f'Unsupported model architecture: {architecture}')
 

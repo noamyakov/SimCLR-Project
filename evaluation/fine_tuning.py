@@ -58,7 +58,7 @@ def replace_model_head(model, architecture, n_classes):
     :param architecture: The model architecture, either 'resnetX' or 'vggX'.
     :param n_classes: The number of output features in the new fully connected layer.
     """
-    in_features = utils.get_final_layer_based_on_architecture(model, architecture).in_features
+    in_features = utils.get_final_layer_based_on_architecture(model, architecture, is_simclr_model=True).in_features
     fc = nn.Linear(in_features=in_features, out_features=n_classes)
     utils.set_final_layer_based_on_architecture(model, fc, architecture)
 
