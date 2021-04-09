@@ -6,8 +6,8 @@ import utils
 
 def create_simclr_models(architecture1, architecture2):
     # Create the base encoders.
-    model1 = utils.load_pretrained_model_based_on_architecture(architecture1)
-    model2 = utils.load_pretrained_model_based_on_architecture(architecture2)
+    model1 = utils.load_model_based_on_architecture(architecture1, pretrained=True)
+    model2 = utils.load_model_based_on_architecture(architecture2, pretrained=True)
 
     # Change the models' classifiers to a shared projection head.
     in_features1 = utils.get_final_layer_based_on_architecture(model1, architecture1).in_features

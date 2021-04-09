@@ -51,7 +51,7 @@ def create_cross_entropy_loss():
     return nn.CrossEntropyLoss()
 
 
-def replace_model_head(model, architecture, n_classes=10):
+def replace_model_head(model, architecture, n_classes):
     """
     Replaces the final layer of the given ResNet or VGG model with a new fully connected layer.
     :param model: The model to replace its final layer.

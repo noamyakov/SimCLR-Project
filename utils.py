@@ -5,20 +5,21 @@ from torch.utils.data import DataLoader
 from torchvision import models
 
 
-def load_pretrained_model_based_on_architecture(architecture):
+def load_model_based_on_architecture(architecture, pretrained):
     """
     Loads a PyTorch pretrained model with the given architecture (either ResNet18, ResNet34, VGG11 or VGG13).
     :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param pretrained: Whether the model should be pre-trained or not.
     :return: A PyTorch pretrained model that matches the given architecture.
     """
     if architecture == 'resnet18':
-        return models.resnet18(pretrained=True)
+        return models.resnet18(pretrained=pretrained)
     elif architecture == 'resnet34':
-        return models.resnet34(pretrained=True)
+        return models.resnet34(pretrained=pretrained)
     elif architecture == 'vgg11':
-        return models.vgg11(pretrained=True)
+        return models.vgg11(pretrained=pretrained)
     elif architecture == 'vgg13':
-        return models.vgg13(pretrained=True)
+        return models.vgg13(pretrained=pretrained)
     else:
         raise ValueError(f'Unsupported model architecture.')
 
@@ -43,6 +44,27 @@ def get_optimal_device():
     :return: The optimal device available.
     """
     return 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
+def save_model(model, path):
+    """
+    Saves a model at the given path.
+    :param model: The model to save.
+    :param path: Where to save the model.
+    """
+    torch.save(model.state_dict(), path)
+
+
+def load_saved_model(architecture, path):
+    """
+    Loads a model which was saved earlier at the given path.
+    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param path: Where the model was saved.
+    :return: The model loaded from the given path.
+    """
+    model = load_model_based_on_architecture(architecture, pretrained=False)
+    model.load_state_dict(torch.load(path))
+    return model
 
 
 def create_data_loader(dataset, is_train, batch_size):
@@ -95,4 +117,4 @@ def print_epoch_metrics(epoch, metrics, digits=3):
     :param metrics: The metrics to display about the epoch.
     :param digits: The number of digits to display after the decimal point of every metric.
     """
-    print('\t'.join([f'Epoch {epoch}', *[f'{metric}: {value:.{digits}f}' for metric, value in metrics.items()]]))
+    print('\t'.join([f'Epoch {epoch}:\t', *[f'{metric}: {value:.{digits}f}' for metric, value in metrics.items()]]))
