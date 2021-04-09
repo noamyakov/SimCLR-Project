@@ -45,7 +45,7 @@ def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs
 
 def create_cross_entropy_loss():
     """
-    Create a Cross Entropy Loss object, which is great for multi-class classification.
+    Creates a Cross Entropy Loss object, which is great for multi-class classification.
     :return: Cross Entropy Loss object.
     """
     return nn.CrossEntropyLoss()
@@ -53,7 +53,7 @@ def create_cross_entropy_loss():
 
 def replace_model_head(model, architecture, n_classes=10):
     """
-    Replace the final layer of the given ResNet or VGG model with a new fully connected layer.
+    Replaces the final layer of the given ResNet or VGG model with a new fully connected layer.
     :param model: The model to replace its final layer.
     :param architecture: The model architecture, either 'resnetX' or 'vggX'.
     :param n_classes: The number of output features in the new fully connected layer.
@@ -65,7 +65,7 @@ def replace_model_head(model, architecture, n_classes=10):
 
 def freeze_model(model):
     """
-    Freeze all the given model's gradients.
+    Freezes all the given model's gradients.
     :param model: The model to freeze its gradients.
     """
     for parameter in model.parameters():
@@ -74,7 +74,7 @@ def freeze_model(model):
 
 def evaluate_model(model, data_loader, device):
     """
-    Evaluate a model by computing its top-1 accuracy over the given dataset.
+    Evaluates a model by computing its top-1 accuracy over the given dataset.
     :param model: The model to compute its accuracy over the dataset.
     :param data_loader: Data loader for the dataset used for accuracy computation.
     :param device: The device to use for evaluation.
@@ -105,7 +105,7 @@ def evaluate_model(model, data_loader, device):
 
 def train_one_epoch(model, optimizer, criterion, data_loader, device):
     """
-    Train a model on the given dataset for one epoch.
+    Trains a model on the given dataset for one epoch.
     :param model: The model to train.
     :param optimizer: The optimizer used for train.
     :param criterion: The loss function used for training.
@@ -141,7 +141,7 @@ def train_one_epoch(model, optimizer, criterion, data_loader, device):
 
 def compute_loss(model, criterion, data_loader, device):
     """
-    Compute the average loss of the model over the given dataset.
+    Computes the average loss of the model over the given dataset.
     :param model: The model to compute its loss.
     :param criterion: The loss function used.
     :param data_loader: Data loader for the dataset.
