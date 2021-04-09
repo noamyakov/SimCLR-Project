@@ -1,5 +1,21 @@
+import itertools
+
 import torch
 from torch.utils.data import DataLoader
+
+
+def create_sgd_optimizer(models, learning_rate, momentum):
+    """
+    Creates a standard SGD optimizer for all of the given models.
+    :param models: The models which the optimizer will use their parameters.
+    :param learning_rate: The learning rate to use.
+    :param momentum: The momentum to use.
+    :return: SGD optimizer for all of the given models.
+    """
+    # Chain the parameters of all the models.
+    parameters = itertools.chain(*[model.parameters() for model in models])
+    # Create a SGD optimizer for this parameters.
+    return torch.optim.SGD(parameters, lr=learning_rate, momentum=momentum)
 
 
 def create_data_loader(dataset, is_train, batch_size):
@@ -11,17 +27,6 @@ def create_data_loader(dataset, is_train, batch_size):
     :return: Data loader for the given dataset.
     """
     return DataLoader(dataset, batch_size=batch_size, shuffle=is_train)
-
-
-def create_sgd_optimizer(model, learning_rate, momentum):
-    """
-    Creates a standard SGD optimizer for the given model.
-    :param model: The model which the optimizer will use.
-    :param learning_rate: The learning rate to use.
-    :param momentum: The momentum to use.
-    :return: SGD optimizer for the given model.
-    """
-    return torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
 
 def get_final_layer_based_on_architecture(model, architecture):
