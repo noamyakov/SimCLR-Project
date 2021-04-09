@@ -18,6 +18,14 @@ def create_sgd_optimizer(models, learning_rate, momentum):
     return torch.optim.SGD(parameters, lr=learning_rate, momentum=momentum)
 
 
+def get_optimal_device():
+    """
+    Returns the optimal device available, either CUDA or CPU.
+    :return: The optimal device available.
+    """
+    return 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
 def create_data_loader(dataset, is_train, batch_size):
     """
     Creates a data loader for the given dataset.
