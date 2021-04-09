@@ -7,6 +7,7 @@ from utils import create_data_loader
 def load_cifar10_data(batch_size):
     """
     Downloads the CIFAR10 dataset and loads it into train and test data loaders.
+    :param batch_size: The batch size to use when loading data from the dataset.
     :return: Data loaders for the train and test datasets of CIFAR10.
     """
     # Download the train and test datasets.
@@ -20,7 +21,7 @@ def load_cifar10_data(batch_size):
 
 def download_dataset(data_path='./CIFAR10_data'):
     """
-    Download the CIFAR10 dataset.
+    Downloads the CIFAR10 dataset.
     :param data_path: Where to save the downloaded data.
     :return: The train and test datasets of CIFAR10.
     """
@@ -34,7 +35,7 @@ def download_dataset(data_path='./CIFAR10_data'):
 
 def get_transform():
     """
-    Define a transform to resize and normalize the data.
+    Defines a transform to resize and normalize the data.
     :return: The created transform.
     """
     return transforms.Compose([
