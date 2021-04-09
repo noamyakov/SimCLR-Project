@@ -1,14 +1,13 @@
 import torch
 from torch import nn
-from torchvision import models
 
 import utils
 
 
 def create_simclr_models(architecture1, architecture2):
     # Create the base encoders.
-    model1 = load_pretrained_model_based_on_architecture(architecture1)
-    model2 = load_pretrained_model_based_on_architecture(architecture2)
+    model1 = utils.load_pretrained_model_based_on_architecture(architecture1)
+    model2 = utils.load_pretrained_model_based_on_architecture(architecture2)
 
     # Change the models' classifiers to a shared projection head.
     in_features1 = utils.get_final_layer_based_on_architecture(model1, architecture1).in_features
@@ -133,21 +132,3 @@ def pairwise_cosine_sim(X, Y):
     X = X / torch.linalg.norm(X, dim=1).reshape(-1, 1)
     Y = Y / torch.linalg.norm(Y, dim=1).reshape(-1, 1)
     return torch.mm(X, Y.T)
-
-
-def load_pretrained_model_based_on_architecture(architecture):
-    """
-    Loads a PyTorch pretrained model with the given architecture (either ResNet18, ResNet34, VGG11 or VGG13).
-    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
-    :return: A PyTorch pretrained model that matches the given architecture.
-    """
-    if architecture == 'resnet18':
-        return models.resnet18(pretrained=True)
-    elif architecture == 'resnet34':
-        return models.resnet34(pretrained=True)
-    elif architecture == 'vgg11':
-        return models.vgg11(pretrained=True)
-    elif architecture == 'vgg13':
-        return models.vgg13(pretrained=True)
-    else:
-        raise ValueError(f'Unsupported model architecture.')

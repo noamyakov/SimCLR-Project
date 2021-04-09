@@ -2,18 +2,37 @@ import itertools
 
 import torch
 from torch.utils.data import DataLoader
+from torchvision import models
 
 
-def create_sgd_optimizer(models, learning_rate, momentum):
+def load_pretrained_model_based_on_architecture(architecture):
+    """
+    Loads a PyTorch pretrained model with the given architecture (either ResNet18, ResNet34, VGG11 or VGG13).
+    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :return: A PyTorch pretrained model that matches the given architecture.
+    """
+    if architecture == 'resnet18':
+        return models.resnet18(pretrained=True)
+    elif architecture == 'resnet34':
+        return models.resnet34(pretrained=True)
+    elif architecture == 'vgg11':
+        return models.vgg11(pretrained=True)
+    elif architecture == 'vgg13':
+        return models.vgg13(pretrained=True)
+    else:
+        raise ValueError(f'Unsupported model architecture.')
+
+
+def create_sgd_optimizer(models_in_use, learning_rate, momentum):
     """
     Creates a standard SGD optimizer for all of the given models.
-    :param models: The models which the optimizer will use their parameters.
+    :param models_in_use: The models which the optimizer will use their parameters.
     :param learning_rate: The learning rate to use.
     :param momentum: The momentum to use.
     :return: SGD optimizer for all of the given models.
     """
     # Chain the parameters of all the models.
-    parameters = itertools.chain(*[model.parameters() for model in models])
+    parameters = itertools.chain(*[model.parameters() for model in models_in_use])
     # Create a SGD optimizer for this parameters.
     return torch.optim.SGD(parameters, lr=learning_rate, momentum=momentum)
 
