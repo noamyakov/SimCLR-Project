@@ -1,22 +1,5 @@
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import CIFAR10
-
-
-def load_cifar10_data():
-    """
-    Downloads the CIFAR10 dataset and loads it into train and test data loaders.
-    :return: Data loaders for the train and test datasets of CIFAR10.
-    """
-    # Download the train and test datasets.
-    train_data, test_data = download_dataset()
-
-    # Create data loaders for the train and test datasets.
-    train_loader = create_dataloader(train_data, is_train=True)
-    test_loader = create_dataloader(test_data, is_train=False)
-    return train_loader, test_loader
 
 
 def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs, device):
@@ -56,18 +39,7 @@ def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs
     return train_losses, test_losses, train_accuracies, test_accuracies
 
 
-def create_optimizer(model, learning_rate, momentum):
-    """
-    Create a standard SGD optimizer for the given model.
-    :param model: The model which the optimizer will use.
-    :param learning_rate: The learning rate to use.
-    :param momentum: The momentum to use.
-    :return: SGD optimizer for the given model.
-    """
-    return torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-
-
-def create_criterion():
+def create_cross_entropy_loss():
     """
     Create a Cross Entropy Loss object, which is great for multi-class classification.
     :return: Cross Entropy Loss object.
@@ -195,36 +167,6 @@ def compute_loss(model, criterion, data_loader, device):
         loss = criterion(outputs, labels)
         total_loss += loss.item()
     return total_loss
-
-
-def download_dataset(data_path='./CIFAR10_data'):
-    """
-    Download the CIFAR10 dataset.
-    :param data_path: Where to save the downloaded data.
-    :return: The train and test datasets of CIFAR10.
-    """
-    # Define a transform to resize and normalize the data.
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    # Download the train and test datasets.
-    train_data = CIFAR10(data_path, download=True, train=True, transform=transform)
-    test_data = CIFAR10(data_path, download=True, train=False, transform=transform)
-    return train_data, test_data
-
-
-def create_dataloader(dataset, is_train, batch_size=64):
-    """
-    Create a data loader for the given dataset.
-    :param dataset: The dataset to load.
-    :param is_train: Whether the dataset will be used for training or testing.
-    :param batch_size: The batch size to use.
-    :return: Data loader for the given dataset.
-    """
-    return DataLoader(dataset, batch_size=batch_size, shuffle=is_train)
 
 
 def print_training_progress(epoch, train_loss, test_loss, train_accuracy, test_accuracy, digits=3):
