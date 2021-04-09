@@ -1,7 +1,8 @@
 import torch
-import torchvision
 from torch import nn
-from torch.utils import data
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from torchvision.datasets import CIFAR10
 
 
 def load_cifar10_data():
@@ -203,15 +204,15 @@ def download_dataset(data_path='./CIFAR10_data'):
     :return: The train and test datasets of CIFAR10.
     """
     # Define a transform to resize and normalize the data.
-    transform = torchvision.transforms.Compose([
-        torchvision.transforms.Resize((224, 224)),
-        torchvision.transforms.ToTensor(),
-        torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     # Download the train and test datasets.
-    train_data = torchvision.datasets.CIFAR10(data_path, download=True, train=True, transform=transform)
-    test_data = torchvision.datasets.CIFAR10(data_path, download=True, train=False, transform=transform)
+    train_data = CIFAR10(data_path, download=True, train=True, transform=transform)
+    test_data = CIFAR10(data_path, download=True, train=False, transform=transform)
     return train_data, test_data
 
 
@@ -223,7 +224,7 @@ def create_dataloader(dataset, is_train, batch_size=64):
     :param batch_size: The batch size to use.
     :return: Data loader for the given dataset.
     """
-    return data.DataLoader(dataset, batch_size=batch_size, shuffle=is_train)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=is_train)
 
 
 def print_training_progress(epoch, train_loss, test_loss, train_accuracy, test_accuracy, digits=3):
