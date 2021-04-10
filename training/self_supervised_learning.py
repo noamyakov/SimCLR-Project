@@ -4,6 +4,42 @@ from torch import nn
 import utils
 
 
+def simclr(architecture1, architecture2, train_loader, learning_rate, momentum, temperature, n_epochs):
+    """
+    Full SimCLR method: creates two pre-trained models with a shared projection head and trains them on the given
+    train dataset, then saves the models and returns the losses over the train dataset in every training epoch.
+    :param architecture1: The first model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture2: The second model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param train_loader: Data loader for the train dataset.
+    :param learning_rate: The learning rate to use for the optimizer.
+    :param momentum: The momentum to use for the optimizer.
+    :param temperature: Hyper-parameter that scales the contrastive loss.
+    :param n_epochs: The number of training epochs.
+    :return: The recorded losses over the train dataset on every training epoch.
+    """
+    # Create two pre-trained models with a shared projection head according to the given model architectures.
+    model1, model2 = create_simclr_models(architecture1, architecture2)
+
+    # Create a SGD optimizer for these two models.
+    optimizer = utils.create_sgd_optimizer([model1, model2], learning_rate=learning_rate, momentum=momentum)
+    # Pick the optimal device available for the training phase.
+    device = utils.get_optimal_device()
+
+    # Train the models simultaneously using the SimCLR self supervised learning method.
+    losses = self_supervised_training(
+        model1, model2, optimizer, train_loader, temperature=temperature, n_epochs=n_epochs, device=device
+    )
+
+    # Save the trained models for later evaluation.
+    utils.save_model(model1, architecture1, f'{architecture1}_co-trained_with_{architecture2}.pth',
+                     is_simclr_model=True)
+    utils.save_model(model2, architecture2, f'{architecture2}_co-trained_with_{architecture1}.pth',
+                     is_simclr_model=True)
+
+    # Returns the losses over the train dataset in every training epoch.
+    return losses
+
+
 def create_simclr_models(architecture1, architecture2):
     """
     Creates two SimCLR models with a shared projection head according to the given model architectures.
@@ -49,7 +85,7 @@ def self_supervised_training(model1, model2, optimizer, train_loader, temperatur
     :param temperature: Hyper-parameter that scales the contrastive loss.
     :param n_epochs: The number of training epochs.
     :param device: The device to use for training.
-    :return: The recorded losses over the train datasets on every training epoch.
+    :return: The recorded losses over the train dataset on every training epoch.
     """
     train_losses = []
     for epoch in range(n_epochs):
