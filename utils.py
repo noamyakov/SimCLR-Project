@@ -21,7 +21,7 @@ def load_model_based_on_architecture(architecture, pretrained):
     elif architecture == 'vgg13':
         return models.vgg13(pretrained=pretrained)
     else:
-        raise ValueError(f'Unsupported model architecture.')
+        raise ValueError(f'Unsupported model architecture: {architecture}')
 
 
 def create_sgd_optimizer(models_in_use, learning_rate, momentum):
@@ -46,12 +46,18 @@ def get_optimal_device():
     return 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
-def save_model(model, path):
+def save_model(model, architecture, path, is_simclr_model):
     """
     Saves a model at the given path.
     :param model: The model to save.
+    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
     :param path: Where to save the model.
+    :param is_simclr_model: Whether the model has a projection head or not.
     """
+    if is_simclr_model:
+        # The only way for SimCLR model to be loaded successfully after it has been saved, is by saving only its base
+        # encoder - without the projection head.
+        restore_base_encoder(model, architecture)
     torch.save(model.state_dict(), path)
 
 
@@ -65,6 +71,20 @@ def load_saved_model(architecture, path):
     model = load_model_based_on_architecture(architecture, pretrained=False)
     model.load_state_dict(torch.load(path))
     return model
+
+
+def restore_base_encoder(model, architecture):
+    """
+    Restores the base encoder (original form) of the given model.
+    :param model: The model to restore its base encoder.
+    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    """
+    # Loads a model from the same architecture that will act as a skeleton and "donate" its final layer for the model.
+    base_encoder_skeleton = load_model_based_on_architecture(architecture, pretrained=False)
+    final_layer_skeleton = get_final_layer_based_on_architecture(base_encoder_skeleton, architecture, is_simclr_model=False)
+
+    # Sets the skeleton's final layer as the final layer of the model.
+    set_final_layer_based_on_architecture(model, final_layer_skeleton, architecture)
 
 
 def create_data_loader(dataset, is_train, batch_size):
@@ -118,4 +138,4 @@ def print_epoch_metrics(epoch, metrics, digits=3):
     :param metrics: The metrics to display about the epoch.
     :param digits: The number of digits to display after the decimal point of every metric.
     """
-    print('\t'.join([f'Epoch {epoch}:\t', *[f'{metric}: {value:.{digits}f}' for metric, value in metrics.items()]]))
+    print('\t'.join([f'Epoch {epoch}:', *[f'{metric}: {value:.{digits}f}' for metric, value in metrics.items()]]))
