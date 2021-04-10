@@ -4,6 +4,83 @@ from torch import nn
 import utils
 
 
+def fine_tune_saved_simclr_models(architecture1, architecture2, train_loader, test_loader, n_classes, learning_rate,
+                                  momentum, n_epochs):
+    """
+    Fine-tunes both of the two SimCLR models that were trained together and saved - one model at a time, and returns
+    the recorded losses and accuracies over the train and test datasets on every training epoch, for each model
+    separately. Then saves the two fine-tuned models (separately).
+    :param architecture1: The first model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture2: The second model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param train_loader: Data loader for the train dataset.
+    :param test_loader: Data loader for the test dataset.
+    :param n_classes: The number of output classes in the model's fine-tuned version.
+    :param learning_rate: The learning rate to use for the optimizer.
+    :param momentum: The momentum to use for the optimizer.
+    :param n_epochs: The number of training epochs.
+    :return: The recorded losses and accuracies over the train and test datasets on every training epoch, for each
+    model separately.
+    """
+    # Load the saved SimCLR models.
+    model1 = utils.load_saved_model(architecture1, f'{architecture1}_co-trained_with_{architecture2}.pth')
+    model2 = utils.load_saved_model(architecture2, f'{architecture2}_co-trained_with_{architecture1}.pth')
+
+    # Fine-tune these two models - one at a time.
+    model1_metrics = fine_tune(
+        model1, architecture1, train_loader, test_loader, n_classes=n_classes, learning_rate=learning_rate,
+        momentum=momentum, n_epochs=n_epochs
+    )
+    model2_metrics = fine_tune(
+        model2, architecture2, train_loader, test_loader, n_classes=n_classes, learning_rate=learning_rate,
+        momentum=momentum, n_epochs=n_epochs
+    )
+
+    # Save the fine-tuned models.
+    utils.save_model(model1, architecture1, f'fine-tuned_{architecture1}_co-trained_with_{architecture2}.pth',
+                     is_simclr_model=False)
+    utils.save_model(model2, architecture2, f'fine-tuned_{architecture2}_co-trained_with_{architecture1}.pth',
+                     is_simclr_model=False)
+
+    # Return the losses and accuracies over the train and test datasets on every training epoch, for each model.
+    return model1_metrics, model2_metrics
+
+
+def fine_tune(model, architecture, train_loader, test_loader, n_classes, learning_rate, momentum, n_epochs):
+    """
+    Fine-tunes the given model to deal with the given number of output classes, then trains it on the given train
+    dataset, evaluates it (loss and accuracy) over both the train and the test datasets on every epoch, and returns
+    these metrics.
+    :param model: The model to fine-tune.
+    :param n_epochs: The number of training epochs.
+    :param architecture:
+    :param train_loader: Data loader for the train dataset.
+    :param test_loader: Data loader for the test dataset.
+    :param n_classes: The number of output classes in the model's fine-tuned version.
+    :param learning_rate: The learning rate to use for the optimizer.
+    :param momentum: The momentum to use for the optimizer.
+    :param n_epochs: The number of training epochs.
+    :return: The recorded losses and accuracies over the train and test datasets on every training epoch.
+    """
+    # Freeze the gradients of all the model's parameters and so only the new head parameters can be modified.
+    freeze_model(model)
+    # Replace the models final layer (the head) with a new fully connected layer.
+    replace_model_head(model, architecture, n_classes=n_classes)
+
+    # Create a SGD optimizer for this model.
+    optimizer = utils.create_sgd_optimizer([model], learning_rate=learning_rate, momentum=momentum)
+    # Use the Cross Entropy Loss because is performs well with multi-class classification.
+    criterion = create_cross_entropy_loss()
+    # Pick the optimal device available for the training phase.
+    device = utils.get_optimal_device()
+
+    # Train the model on the given train dataset.
+    metrics = train_model(
+        model, optimizer, criterion, train_loader, test_loader, n_epochs=n_epochs, device=device
+    )
+    # Return the losses and accuracies over the train and test datasets on every training epoch.
+    return metrics
+
+
 def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs, device):
     """
     Trains the model on the given train data and evaluates it on the given test data with every completed epoch.
