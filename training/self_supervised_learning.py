@@ -16,8 +16,8 @@ def create_simclr_models(architecture1, architecture2):
     model2 = utils.load_model_based_on_architecture(architecture2, pretrained=True)
 
     # Change the models' classifiers to a shared projection head.
-    in_features1 = utils.get_final_layer_based_on_architecture(model1, architecture1, is_simclr_model=False).in_features
-    in_features2 = utils.get_final_layer_based_on_architecture(model2, architecture2, is_simclr_model=False).in_features
+    in_features1 = utils.get_final_layer_based_on_architecture(model1, architecture1).in_features
+    in_features2 = utils.get_final_layer_based_on_architecture(model2, architecture2).in_features
     if in_features1 == in_features2:
         head1 = nn.Sequential(nn.Linear(in_features1, 100),
                               nn.ReLU(),
