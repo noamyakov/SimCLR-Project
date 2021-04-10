@@ -8,7 +8,7 @@ def train_model(model, optimizer, criterion, train_loader, test_loader, n_epochs
     """
     Trains the model on the given train data and evaluates it on the given test data with every completed epoch.
     :param model: The model to train.
-    :param optimizer: The optimizer used for train.
+    :param optimizer: The optimizer used for training.
     :param criterion: The loss function used for training.
     :param train_loader: Data loader for the train dataset.
     :param test_loader: Data loader for the test dataset.

@@ -5,6 +5,12 @@ import utils
 
 
 def create_simclr_models(architecture1, architecture2):
+    """
+    Creates two SimCLR models with a shared projection head according to the given model architectures.
+    :param architecture1: The first model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture2: The second model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :return: Two SimCLR models with a shared projection head and with the given model architectures as base encoders.
+    """
     # Create the base encoders.
     model1 = utils.load_model_based_on_architecture(architecture1, pretrained=True)
     model2 = utils.load_model_based_on_architecture(architecture2, pretrained=True)
@@ -34,6 +40,17 @@ def create_simclr_models(architecture1, architecture2):
 
 
 def self_supervised_training(model1, model2, optimizer, train_loader, temperature, n_epochs, device):
+    """
+    Trains both the models simultaneously according to the SimCLR method of self supervised learning.
+    :param model1: The first model to train.
+    :param model2: The second model to train.
+    :param optimizer: The optimizer used for training.
+    :param train_loader: Data loader for the train dataset.
+    :param temperature: Hyper-parameter that scales the contrastive loss.
+    :param n_epochs: The number of training epochs.
+    :param device: The device to use for training.
+    :return: The recorded losses over the train datasets on every training epoch.
+    """
     train_losses = []
     for epoch in range(n_epochs):
         # Train the model for one epoch and compute the average loss over the train set.
@@ -54,7 +71,7 @@ def train_one_epoch(model1, model2, optimizer, data_loader, temperature, device)
     :param model2: The second model to train.
     :param optimizer: The optimizer used for train.
     :param data_loader: Data loader for the train dataset.
-    :param temperature:
+    :param temperature: Hyper-parameter that scales the contrastive loss.
     :param device: The device to use for training.
     :return: The average loss over the whole dataset.
     """
