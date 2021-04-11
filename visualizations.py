@@ -69,13 +69,16 @@ def plot_embedded_features(model, architecture, train_loader, test_loader, max_n
     train_features, train_labels = extract_features_and_labels(model, train_loader, device=device)
     test_features, test_labels = extract_features_and_labels(model, test_loader, device=device)
 
-    # Reduce features dimensions with T-SNE (from 20d vectors to 2d vectors)
-    tsne = TSNE(n_components=2, random_state=0)
-    train_embedded = tsne.fit_transform(train_features)
-    test_embedded = tsne.fit_transform(test_features)
-
     # Get the number of classes to embed their features.
     classes = np.unique(train_labels)[:max_n_classes]
+    # Get the indexes of the samples from these classes.
+    train_idx = np.isin(train_labels, classes)
+    test_idx = np.isin(test_labels, classes)
+
+    # Reduce features dimensions with T-SNE (from 20d vectors to 2d vectors)
+    tsne = TSNE(n_components=2, random_state=0)
+    train_embedded = tsne.fit_transform(train_features[train_idx])
+    test_embedded = tsne.fit_transform(test_features[test_idx])
 
     plt.rcParams['figure.figsize'] = (13, 5)
     # Plot the embedded features of the train dataset.
