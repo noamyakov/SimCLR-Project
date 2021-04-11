@@ -18,7 +18,7 @@ def simclr(architecture1, architecture2, train_loader, learning_rate, momentum, 
     :return: The recorded losses over the train dataset on every training epoch.
     """
     # Create two pre-trained models with a shared projection head according to the given model architectures.
-    model1, model2 = create_simclr_models(architecture1, architecture2)
+    model1, model2 = create_simclr_models(architecture1, architecture2, pretrained=True)
 
     # Create a SGD optimizer for these two models.
     optimizer = utils.create_sgd_optimizer([model1, model2], learning_rate=learning_rate, momentum=momentum)
@@ -31,25 +31,24 @@ def simclr(architecture1, architecture2, train_loader, learning_rate, momentum, 
     )
 
     # Save the trained models for later evaluation.
-    utils.save_model(model1, architecture1, f'{architecture1}_co-trained_with_{architecture2}.pth',
-                     is_simclr_model=True)
-    utils.save_model(model2, architecture2, f'{architecture2}_co-trained_with_{architecture1}.pth',
-                     is_simclr_model=True)
+    utils.save_model(model1, utils.construct_simclr_model_filename(architecture1, architecture2))
+    utils.save_model(model2, utils.construct_simclr_model_filename(architecture2, architecture1))
 
     # Returns the losses over the train dataset in every training epoch.
     return losses
 
 
-def create_simclr_models(architecture1, architecture2):
+def create_simclr_models(architecture1, architecture2, pretrained):
     """
     Creates two SimCLR models with a shared projection head according to the given model architectures.
     :param architecture1: The first model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param architecture2: The second model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
+    :param pretrained: Whether the base encoders should be pre-trained or not.
     :return: Two SimCLR models with a shared projection head and with the given model architectures as base encoders.
     """
     # Create the base encoders.
-    model1 = utils.load_model_based_on_architecture(architecture1, pretrained=True)
-    model2 = utils.load_model_based_on_architecture(architecture2, pretrained=True)
+    model1 = utils.load_model_based_on_architecture(architecture1, pretrained=pretrained)
+    model2 = utils.load_model_based_on_architecture(architecture2, pretrained=pretrained)
 
     # Change the models' classifiers to a shared projection head.
     in_features1 = utils.get_final_layer_based_on_architecture(model1, architecture1).in_features
@@ -185,6 +184,24 @@ def pairwise_cosine_sim(X, Y):
     X = X / torch.linalg.norm(X, dim=1).reshape(-1, 1)
     Y = Y / torch.linalg.norm(Y, dim=1).reshape(-1, 1)
     return torch.mm(X, Y.T)
+
+
+def load_saved_simclr_models(architecture1, architecture2, path1, path2):
+    """
+    Loads two SimCLR models with projection head that were trained together and was saved earlier at the given paths.
+    :param architecture1: The model architecture of the first SimCLR model that is being loaded.
+    :param architecture2: The model architecture of the second SimCLR model that is being loaded.
+    :param path1: Where the first model was saved.
+    :param path2: Where the second model was saved.
+    :return: The models loaded from the given paths.
+    """
+    # Create a skeleton of the two models in order to load them in there.
+    model1, model2 = create_simclr_models(architecture1, architecture2, pretrained=False)
+
+    # Load the models from the given paths.
+    model1.load_state_dict(torch.load(path1))
+    model2.load_state_dict(torch.load(path2))
+    return model1, model2
 
 
 def extract_features_and_labels(model, data_loader, device):

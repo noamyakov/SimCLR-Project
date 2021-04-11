@@ -46,36 +46,18 @@ def get_optimal_device():
     return 'CUDA' if torch.cuda.is_available() else 'CPU'
 
 
-def save_model(model, architecture, path, is_simclr_model):
+def save_model(model, path):
     """
     Saves a model at the given path.
     :param model: The model to save.
-    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param path: Where to save the model.
-    :param is_simclr_model: Whether the model has a projection head or not.
     """
-    if is_simclr_model:
-        # The only way for SimCLR model to be loaded successfully after it has been saved, is by saving only its base
-        # encoder - without the projection head.
-        restore_base_encoder(model, architecture)
     torch.save(model.state_dict(), path)
-
-
-def load_saved_model(architecture, path):
-    """
-    Loads a model which was saved earlier at the given path.
-    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
-    :param path: Where the model was saved.
-    :return: The model loaded from the given path.
-    """
-    model = load_model_based_on_architecture(architecture, pretrained=False)
-    model.load_state_dict(torch.load(path))
-    return model
 
 
 def restore_base_encoder(model, architecture):
     """
-    Restores the base encoder (original form) of the given model.
+    Restores the base encoder (original form) of the given SimCLR model. Removes the projection head.
     :param model: The model to restore its base encoder.
     :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     """

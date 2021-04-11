@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.manifold import TSNE
 
 import utils
-from training.self_supervised_learning import extract_features_and_labels
+from training.self_supervised_learning import extract_features_and_labels, load_saved_simclr_models
 
 
 def plot_metrics_along_epochs(metrics, unit_of_measurement):
@@ -43,8 +43,9 @@ def simclr_features_embedding(architecture1, architecture2, train_loader, test_l
     :param max_n_classes: The maximal number of classes to embed their features.
     """
     # Load the saved SimCLR models.
-    model1 = utils.load_saved_model(architecture1, utils.construct_simclr_model_filename(architecture1, architecture2))
-    model2 = utils.load_saved_model(architecture2, utils.construct_simclr_model_filename(architecture2, architecture1))
+    model1, model2 = load_saved_simclr_models(architecture1, architecture2,
+                                              utils.construct_simclr_model_filename(architecture1, architecture2),
+                                              utils.construct_simclr_model_filename(architecture2, architecture1))
 
     # Pick the optimal device available for the feature extraction phase.
     device = utils.get_optimal_device()
