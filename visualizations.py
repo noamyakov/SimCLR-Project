@@ -84,13 +84,13 @@ def plot_embedded_features(model, architecture, train_loader, test_loader, max_n
     # Plot the embedded features of the train dataset.
     plt.subplot(1, 2, 1)
     for c in classes:
-        idx = np.where(train_labels == c)
+        idx = np.where(train_labels[train_idx] == c)
         plt.scatter(train_embedded[idx, 0], train_embedded[idx, 1], label=c)
         plt.title(f'Train Features Produced by {architecture}')
     # Plot the embedded features of the test dataset.
     plt.subplot(1, 2, 2)
     for c in classes:
-        idx = np.where(test_labels == c)
+        idx = np.where(test_labels[test_idx] == c)
         plt.scatter(test_embedded[idx, 0], test_embedded[idx, 1], label=c)
         plt.title(f'Test Features Produced by {architecture}')
     plt.show()
