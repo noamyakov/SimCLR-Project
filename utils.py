@@ -7,18 +7,18 @@ from torchvision import models
 
 def load_model_based_on_architecture(architecture, pretrained):
     """
-    Loads a PyTorch pretrained model with the given architecture (either ResNet18, ResNet34, VGG11 or VGG13).
-    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    Loads a PyTorch pretrained model with the given architecture.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param pretrained: Whether the model should be pre-trained or not.
     :return: A PyTorch pretrained model that matches the given architecture.
     """
-    if architecture == 'resnet18':
+    if architecture == 'ResNet18':
         return models.resnet18(pretrained=pretrained)
-    elif architecture == 'resnet34':
+    elif architecture == 'ResNet34':
         return models.resnet34(pretrained=pretrained)
-    elif architecture == 'vgg11':
+    elif architecture == 'VGG11':
         return models.vgg11(pretrained=pretrained)
-    elif architecture == 'vgg13':
+    elif architecture == 'VGG13':
         return models.vgg13(pretrained=pretrained)
     else:
         raise ValueError(f'Unsupported model architecture: {architecture}')
@@ -43,14 +43,14 @@ def get_optimal_device():
     Returns the optimal device available, either CUDA or CPU.
     :return: The optimal device available.
     """
-    return 'cuda' if torch.cuda.is_available() else 'cpu'
+    return 'CUDA' if torch.cuda.is_available() else 'CPU'
 
 
 def save_model(model, architecture, path, is_simclr_model):
     """
     Saves a model at the given path.
     :param model: The model to save.
-    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param path: Where to save the model.
     :param is_simclr_model: Whether the model has a projection head or not.
     """
@@ -64,7 +64,7 @@ def save_model(model, architecture, path, is_simclr_model):
 def load_saved_model(architecture, path):
     """
     Loads a model which was saved earlier at the given path.
-    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param path: Where the model was saved.
     :return: The model loaded from the given path.
     """
@@ -77,7 +77,7 @@ def restore_base_encoder(model, architecture):
     """
     Restores the base encoder (original form) of the given model.
     :param model: The model to restore its base encoder.
-    :param architecture: The model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     """
     # Load a model of the same architecture that will act as a skeleton and "donate" its final layer for the model.
     base_encoder_skeleton = load_model_based_on_architecture(architecture, pretrained=False)
@@ -102,13 +102,13 @@ def get_final_layer_based_on_architecture(model, architecture):
     """
     Returns the final layer (the head) of the given model based on its architecture.
     :param model: The model to return its final layer.
-    :param architecture: The model architecture, either 'resnetX' or 'vggX'.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :return: The model's final layer.
     """
     # Different model architectures use a different name for their final layer.
-    if architecture.startswith('resnet'):
+    if architecture.startswith('ResNet'):
         return model.fc
-    elif architecture.startswith('vgg'):
+    elif architecture.startswith('VGG'):
         return model.classifier[6]
     else:
         raise ValueError(f'Unsupported model architecture: {architecture}')
@@ -119,12 +119,12 @@ def set_final_layer_based_on_architecture(model, layer, architecture):
     Sets the given layer as the final layer (the head) of the given model based on its architecture.
     :param model: The model to sets its final layer.
     :param layer: The layer to set as the model's final layer.
-    :param architecture: The model architecture, either 'resnetX' or 'vggX'.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     """
     # Different model architectures use a different name for their final layer.
-    if architecture.startswith('resnet'):
+    if architecture.startswith('ResNet'):
         model.fc = layer
-    elif architecture.startswith('vgg'):
+    elif architecture.startswith('VGG'):
         model.classifier[6] = layer
     else:
         raise ValueError(f'Unsupported model architecture: {architecture}')
@@ -138,3 +138,26 @@ def print_epoch_metrics(epoch, metrics, digits=3):
     :param digits: The number of digits to display after the decimal point of every metric.
     """
     print('\t'.join([f'Epoch {epoch}:', *[f'{metric}: {value:.{digits}f}' for metric, value in metrics.items()]]))
+
+
+def construct_simclr_model_filename(architecture_of_this, architecture_of_other):
+    """
+    Constructs a filename in which our SimCLR model will be saved.
+    :param architecture_of_this: The model architecture of the SimCLR model the returned filename is used for.
+    :param architecture_of_other: The model architecture of the other SimCLR model that was trained together with the
+    model the returned filename is used for.
+    :return: The filename in which our SimCLR model will be saved.
+    """
+    return f'{architecture_of_this}_trained_with_{architecture_of_other}.pth'
+
+
+def construct_fine_tuned_simclr_model_filename(architecture_of_this, architecture_of_other):
+    """
+    Constructs a filename in which our fine-tuned SimCLR model will be saved.
+    :param architecture_of_this: The model architecture of the fine-tuned SimCLR model the returned filename is used
+    for.
+    :param architecture_of_other: The model architecture of the other SimCLR model that was trained together with the
+    model the returned filename is used for.
+    :return: The filename in which our fine-tuned SimCLR model will be saved.
+    """
+    return f'fine-tuned_{construct_simclr_model_filename(architecture_of_this, architecture_of_other)}'

@@ -10,8 +10,8 @@ def fine_tune_saved_simclr_models(architecture1, architecture2, train_loader, te
     Fine-tunes both of the two SimCLR models that were trained together and saved - one model at a time, and returns
     the recorded losses and accuracies over the train and test datasets on every training epoch, for each model
     separately. Then saves the two fine-tuned models (separately).
-    :param architecture1: The first model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
-    :param architecture2: The second model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture1: The first model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
+    :param architecture2: The second model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param train_loader: Data loader for the train dataset.
     :param test_loader: Data loader for the test dataset.
     :param n_classes: The number of output classes in the model's fine-tuned version.
@@ -22,8 +22,8 @@ def fine_tune_saved_simclr_models(architecture1, architecture2, train_loader, te
     model separately.
     """
     # Load the saved SimCLR models.
-    model1 = utils.load_saved_model(architecture1, f'{architecture1}_co-trained_with_{architecture2}.pth')
-    model2 = utils.load_saved_model(architecture2, f'{architecture2}_co-trained_with_{architecture1}.pth')
+    model1 = utils.load_saved_model(architecture1, utils.construct_simclr_model_filename(architecture1, architecture2))
+    model2 = utils.load_saved_model(architecture2, utils.construct_simclr_model_filename(architecture2, architecture1))
 
     # Fine-tune these two models - one at a time.
     model1_metrics = fine_tune(
@@ -132,7 +132,7 @@ def replace_model_head(model, architecture, n_classes):
     """
     Replaces the final layer of the given ResNet or VGG model with a new fully connected layer.
     :param model: The model to replace its final layer.
-    :param architecture: The model architecture, either 'resnetX' or 'vggX'.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param n_classes: The number of output features in the new fully connected layer.
     """
     # Load a model of the same architecture that will act as a skeleton and let us know how many in_features there

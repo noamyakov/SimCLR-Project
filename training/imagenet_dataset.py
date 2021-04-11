@@ -47,7 +47,8 @@ class ImageNetMini(Dataset):
         self.transform = transform
         self.class_mappings = {class_name: i for i, class_name in enumerate(os.listdir(root_dir))}
         self.images_path = np.array(sorted(os.path.join(root, file)
-                                           for root, _, files in os.walk(root_dir) for file in files))
+                                           for root, _, files in os.walk(root_dir) for file in files
+                                           if file.endswith('.JPEG')))
         self.labels = np.array([self.class_mappings[x.split(os.path.sep)[-2]] for x in self.images_path])
 
     def __len__(self):

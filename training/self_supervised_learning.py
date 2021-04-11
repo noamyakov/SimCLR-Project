@@ -8,8 +8,8 @@ def simclr(architecture1, architecture2, train_loader, learning_rate, momentum, 
     """
     Full SimCLR method: creates two pre-trained models with a shared projection head and trains them on the given
     train dataset, then saves the models and returns the losses over the train dataset in every training epoch.
-    :param architecture1: The first model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
-    :param architecture2: The second model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture1: The first model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
+    :param architecture2: The second model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param train_loader: Data loader for the train dataset.
     :param learning_rate: The learning rate to use for the optimizer.
     :param momentum: The momentum to use for the optimizer.
@@ -43,8 +43,8 @@ def simclr(architecture1, architecture2, train_loader, learning_rate, momentum, 
 def create_simclr_models(architecture1, architecture2):
     """
     Creates two SimCLR models with a shared projection head according to the given model architectures.
-    :param architecture1: The first model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
-    :param architecture2: The second model architecture, one of 'resnet18', 'resnet34', 'vgg11' and 'vgg13'.
+    :param architecture1: The first model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
+    :param architecture2: The second model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :return: Two SimCLR models with a shared projection head and with the given model architectures as base encoders.
     """
     # Create the base encoders.
@@ -185,3 +185,37 @@ def pairwise_cosine_sim(X, Y):
     X = X / torch.linalg.norm(X, dim=1).reshape(-1, 1)
     Y = Y / torch.linalg.norm(Y, dim=1).reshape(-1, 1)
     return torch.mm(X, Y.T)
+
+
+def extract_features_and_labels(model, data_loader, device):
+    """
+    Extracts the features and labels of the given dataset that are produced by the given model.
+    :param model: The model to use for features extraction.
+    :param data_loader: Data loader for the dataset we use for extraction.
+    :param device: The device to use for features extraction.
+    :return: Numpy arrays contain the features and labels of the given dataset that are produced by the given model.
+    """
+    # Move model to device.
+    model.to(device)
+    # Set model in evaluation mode.
+    model.eval()
+
+    # Our projection head produces outputs consisting of 20 features.
+    out_features = 20
+    # Create empty placeholders.
+    extracted_features = torch.empty((0, out_features))
+    extracted_labels = torch.empty(0, dtype=torch.long)
+    for batch in data_loader:
+        # Move data to device.
+        images = batch['image'].to(device)
+
+        # Extract the features.
+        features = model(images)
+        extracted_features = torch.cat((extracted_features, features.cpu().detach()))
+
+        # Extract the labels.
+        labels = batch['label']
+        extracted_labels = torch.cat((extracted_labels, labels))
+
+    # Convert the extracted features and labels into NumPy arrays.
+    return extracted_features.numpy(), extracted_labels.numpy()
