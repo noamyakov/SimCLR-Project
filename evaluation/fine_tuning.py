@@ -48,6 +48,36 @@ def fine_tune_saved_simclr_models(architecture1, architecture2, train_loader, te
     return model1_metrics, model2_metrics
 
 
+def fine_tune_pretrained_model(architecture, train_loader, test_loader, n_classes, learning_rate, momentum, n_epochs):
+    """
+    Fine-tunes a pre-trained model, and returns the recorded losses and accuracies over the train and test datasets on
+    every training epoch. Then saves the fine-tuned model.
+    :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
+    :param train_loader: Data loader for the train dataset.
+    :param test_loader: Data loader for the test dataset.
+    :param n_classes: The number of output classes in the model's fine-tuned version.
+    :param learning_rate: The learning rate to use for the optimizer.
+    :param momentum: The momentum to use for the optimizer.
+    :param n_epochs: The number of training epochs.
+    :return: The recorded losses and accuracies over the train and test datasets on every training epoch, for each
+    model separately.
+    """
+    # Load the pre-trained model.
+    model = utils.load_model_based_on_architecture(architecture, pretrained=True)
+
+    # Fine-tune this model.
+    metrics = fine_tune(
+        model, architecture, train_loader, test_loader, n_classes=n_classes, learning_rate=learning_rate,
+        momentum=momentum, n_epochs=n_epochs
+    )
+
+    # Save the fine-tuned model.
+    utils.save_model(model, utils.construct_fine_tuned_pretrained_model_filename(architecture))
+
+    # Return the losses and accuracies over the train and test datasets on every training epoch.
+    return metrics
+
+
 def fine_tune(model, architecture, train_loader, test_loader, n_classes, learning_rate, momentum, n_epochs):
     """
     Fine-tunes the given model to deal with the given number of output classes, then trains it on the given train

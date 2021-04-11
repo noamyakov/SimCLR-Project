@@ -143,3 +143,12 @@ def construct_fine_tuned_simclr_model_filename(architecture_of_this, architectur
     :return: The filename in which our fine-tuned SimCLR model will be saved.
     """
     return f'fine-tuned_{construct_simclr_model_filename(architecture_of_this, architecture_of_other)}'
+
+
+def construct_fine_tuned_pretrained_model_filename(architecture):
+    """
+    Constructs a filename in which our fine-tuned pre-trained model will be saved.
+    :param architecture: The model architecture of the fine-tuned pre-trained model the returned filename is used for.
+    :return: The filename in which our fine-tuned pre-trained model will be saved.
+    """
+    return f'fine-tuned_pre-trained_{architecture}'
