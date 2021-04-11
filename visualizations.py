@@ -32,7 +32,7 @@ def plot_metrics_along_epochs(metrics, unit_of_measurement):
     plt.show()
 
 
-def simclr_features_embedding(architecture1, architecture2, train_loader, test_loader):
+def simclr_features_embedding(architecture1, architecture2, train_loader, test_loader, max_n_classes):
     """
     Extract the features of the given train and test datasets (without augmentations) that are produced by 2 trained
     SimCLR models, and plot their embeddings in a 2-dimensional space.
@@ -40,6 +40,7 @@ def simclr_features_embedding(architecture1, architecture2, train_loader, test_l
     :param architecture2: The second model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param train_loader: Data loader for the train dataset.
     :param test_loader: Data loader for the test dataset.
+    :param max_n_classes: The maximal number of classes to embed their features.
     """
     # Load the saved SimCLR models.
     model1 = utils.load_saved_model(architecture1, utils.construct_simclr_model_filename(architecture1, architecture2))
@@ -48,11 +49,11 @@ def simclr_features_embedding(architecture1, architecture2, train_loader, test_l
     # Pick the optimal device available for the feature extraction phase.
     device = utils.get_optimal_device()
     # Plot the embedded features produced by each of the models.
-    plot_embedded_features(model1, architecture1, train_loader, test_loader, device)
-    plot_embedded_features(model2, architecture2, train_loader, test_loader, device)
+    plot_embedded_features(model1, architecture1, train_loader, test_loader, max_n_classes=max_n_classes, device=device)
+    plot_embedded_features(model2, architecture2, train_loader, test_loader, max_n_classes=max_n_classes, device=device)
 
 
-def plot_embedded_features(model, architecture, train_loader, test_loader, device):
+def plot_embedded_features(model, architecture, train_loader, test_loader, max_n_classes, device):
     """
     Extract the features of the given train and test datasets (without augmentations) that are produced by the given
     trained SimCLR model, and plot their embeddings in a 2-dimensional space.
@@ -60,6 +61,7 @@ def plot_embedded_features(model, architecture, train_loader, test_loader, devic
     :param architecture: The model architecture, one of 'ResNet18', 'ResNet34', 'VGG11' and 'VGG13'.
     :param train_loader: Data loader for the train dataset.
     :param test_loader: Data loader for the test dataset.
+    :param max_n_classes: The maximal number of classes to embed their features.
     :param device: The device to use for features extraction.
     """
     # Extract train and test features that were produced by the first model.
@@ -71,8 +73,8 @@ def plot_embedded_features(model, architecture, train_loader, test_loader, devic
     train_embedded = tsne.fit_transform(train_features)
     test_embedded = tsne.fit_transform(test_features)
 
-    # Get the number of classes in the dataset.
-    classes = np.unique(train_labels)
+    # Get the number of classes to embed their features.
+    classes = np.unique(train_labels)[:max_n_classes]
 
     plt.rcParams['figure.figsize'] = (13, 5)
     # Plot the embedded features of the train dataset.
