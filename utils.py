@@ -43,7 +43,7 @@ def get_optimal_device():
     Returns the optimal device available, either CUDA or CPU.
     :return: The optimal device available.
     """
-    return 'CUDA' if torch.cuda.is_available() else 'CPU'
+    return 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def save_model(model, path):
