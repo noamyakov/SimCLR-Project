@@ -9,28 +9,29 @@ from torchvision import transforms
 from utils import create_data_loader
 
 
-def load_imagenet_data(train_dir, test_dir, batch_size):
+def load_imagenet_data(train_dir, test_dir, aug_batch_size, no_aug_batch_size):
     """
     Loads the ImageNet dataset into train and test data loaders. There are two loader for the train dataset: one with
     augmentations and one without them, for testing purposes.
     :param train_dir: The name of the directory where the train dataset is located.
     :param test_dir: The name of the directory where the test dataset is located.
-    :param batch_size: The batch size to use when loading data from both the train and test datasets.
+    :param aug_batch_size: The batch size to use when loading data with augmentations (training phase).
+    :param no_aug_batch_size: The batch size to use when loading data without augmentations (testing phase).
     :return: Data loaders for the train and test datasets of ImageNet (2 train, 1 test).
     """
     aug_transform, no_aug_transform = get_transforms()
 
     # Create a data loader for the train dataset with augmentations.
     train_dataset = ImageNetMini(root_dir=train_dir, transform=aug_transform, augment=True)
-    train_loader = create_data_loader(train_dataset, is_train=True, batch_size=batch_size)
+    train_loader = create_data_loader(train_dataset, is_train=True, batch_size=aug_batch_size)
 
     # Create a data loader for the train dataset without augmentations.
     raw_train_dataset = ImageNetMini(root_dir=train_dir, transform=no_aug_transform, augment=False)
-    raw_train_loader = create_data_loader(raw_train_dataset, is_train=True, batch_size=batch_size)
+    raw_train_loader = create_data_loader(raw_train_dataset, is_train=True, batch_size=no_aug_batch_size)
 
     # Create a data loader for the test dataset (without augmentations).
     test_dataset = ImageNetMini(root_dir=test_dir, transform=no_aug_transform, augment=False)
-    test_loader = create_data_loader(test_dataset, is_train=False, batch_size=batch_size)
+    test_loader = create_data_loader(test_dataset, is_train=False, batch_size=no_aug_batch_size)
 
     return train_loader, raw_train_loader, test_loader
 
