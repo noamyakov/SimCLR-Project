@@ -201,6 +201,7 @@ def evaluate_model(model, data_loader, device):
     # Set model in evaluation mode.
     model.eval()
 
+    total = 0
     correct = 0
     for images, labels in data_loader:
         # Move data to device.
@@ -211,11 +212,12 @@ def evaluate_model(model, data_loader, device):
         outputs = model(images)
         _, predicted = torch.max(outputs.data, 1)
 
+        total += len(labels)
         # Count the correct predictions.
         correct += (predicted == labels).sum().item()
 
     # Calculate accuracy.
-    accuracy = correct / len(data_loader)
+    accuracy = correct / total
     return accuracy
 
 
@@ -280,4 +282,6 @@ def compute_loss(model, criterion, data_loader, device):
         # Compute the loss.
         loss = criterion(outputs, labels)
         total_loss += loss.item()
-    return total_loss
+    # Compute the average loss.
+    average_loss = total_loss / len(data_loader)
+    return average_loss
