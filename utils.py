@@ -151,4 +151,4 @@ def construct_fine_tuned_pretrained_model_filename(architecture):
     :param architecture: The model architecture of the fine-tuned pre-trained model the returned filename is used for.
     :return: The filename in which our fine-tuned pre-trained model will be saved.
     """
-    return f'fine-tuned_pre-trained_{architecture}'
+    return f'fine-tuned_pre-trained_{architecture}.pth'
