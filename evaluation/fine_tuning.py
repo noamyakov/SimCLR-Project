@@ -27,8 +27,8 @@ def fine_tune_saved_simclr_models(architecture1, architecture2, train_loader, te
                                               utils.construct_simclr_model_filename(architecture1, architecture2),
                                               utils.construct_simclr_model_filename(architecture2, architecture1))
     # Restore their base encoders (remove their projection head).
-    model1 = utils.restore_base_encoder(model1, architecture1)
-    model2 = utils.restore_base_encoder(model2, architecture2)
+    utils.restore_base_encoder(model1, architecture1)
+    utils.restore_base_encoder(model2, architecture2)
 
     # Fine-tune these two models - one at a time.
     model1_metrics = fine_tune(
