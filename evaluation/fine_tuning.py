@@ -94,8 +94,6 @@ def fine_tune(model, architecture, train_loader, test_loader, n_classes, learnin
     :param n_epochs: The number of training epochs.
     :return: The recorded losses and accuracies over the train and test datasets on every training epoch.
     """
-    # Freeze the gradients of all the model's parameters and so only the new head parameters can be modified.
-    freeze_model(model)
     # Replace the models final layer (the head) with a new fully connected layer.
     replace_model_head(model, architecture, n_classes=n_classes)
 
@@ -177,15 +175,6 @@ def replace_model_head(model, architecture, n_classes):
     # Create a new fully connected layer and set it as the models' head.
     fc = nn.Linear(in_features=in_features, out_features=n_classes)
     utils.set_final_layer_based_on_architecture(model, fc, architecture)
-
-
-def freeze_model(model):
-    """
-    Freezes all the given model's gradients.
-    :param model: The model to freeze its gradients.
-    """
-    for parameter in model.parameters():
-        parameter.requires_grad_(False)
 
 
 def evaluate_model(model, data_loader, device):
